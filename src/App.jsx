@@ -6,6 +6,7 @@ const AppCover = styled.div`
   background-color: #f3eaea;
   background-size: cover;
   height: 100vh;
+  margin: 0;
   display: flex;
   justify-content: center;
 `;

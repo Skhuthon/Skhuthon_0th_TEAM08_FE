@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { styled } from "styled-components";
+import styled from "styled-components";
 import { DiaryContext } from "../DiaryContext";
 import { IoMdArrowRoundBack } from "react-icons/io";
 
@@ -74,8 +74,13 @@ const WritePage = () => {
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
   const [emotion, setEmotion] = useState("");
+  const [image, setImage] = useState(null);
   const { addEntry } = useContext(DiaryContext);
   const navigate = useNavigate();
+
+  const handleImageChange = (event) => {
+    setImage(event.target.files[0]);
+  };
 
   const handleSave = (event) => {
     event.preventDefault();
@@ -84,6 +89,7 @@ const WritePage = () => {
       title,
       emotion,
       content,
+      image,
     };
     addEntry(newEntry);
     navigate("/");
@@ -92,6 +98,7 @@ const WritePage = () => {
   const handleCancel = () => {
     navigate("/");
   };
+
   return (
     <>
       <BackBtn onClick={handleCancel}>
@@ -100,9 +107,8 @@ const WritePage = () => {
       <Page>
         <FormContainer>
           <form>
-            {" "}
             오늘의 사진 <br />
-            <InputStyle /> <br />
+            <InputStyle type="file" onChange={handleImageChange} /> <br />
             오늘의 감정 <br />
             <InputStyle
               type="text"
@@ -124,7 +130,9 @@ const WritePage = () => {
             />{" "}
             <br />
             <ButtonContainer>
-              <BtnStyle type="reset">취소</BtnStyle>
+              <BtnStyle type="reset" onClick={handleCancel}>
+                취소
+              </BtnStyle>
               <BtnStyle type="submit" onClick={handleSave}>
                 등록
               </BtnStyle>{" "}
