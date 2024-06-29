@@ -44,7 +44,7 @@ const Header = () => {
     <>
       <HeaderStyle>
         <div onClick={() => navigate("/")}>
-          Romance <br /> Memo
+          SKHU <br /> WIKI
         </div>
         <p>{todayData()}</p>
       </HeaderStyle>
