@@ -36,7 +36,7 @@ const List = () => {
     const fetchEntries = async () => {
       try {
         const response = await axios.get("https://handmark.shop/post");
-        setEntries(response.data.posts);
+        setEntries(response.data.data.posts); // 응답 데이터 형식에 따라 수정
         setLoading(false);
       } catch (error) {
         console.error("Failed to fetch entries:", error);
@@ -67,7 +67,9 @@ const List = () => {
         <div key={entry.postId}>
           <LinkStyle to={`/detail/${entry.postId}`}>
             {entry.title || "제목없음"}
-            <Ex>조회수, 댓글</Ex>
+            <Ex>
+              조회수: {entry.view} | 좋아요: {entry.likes}
+            </Ex>
             <HrStyle />
           </LinkStyle>
         </div>
