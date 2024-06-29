@@ -1,6 +1,5 @@
-import React from "react";
 import styled from "styled-components";
-
+import { useNavigate } from "react-router-dom";
 const HeaderStyle = styled.div`
   padding: auto;
   margin: auto;
@@ -9,28 +8,28 @@ const HeaderStyle = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  position: relative; 
-  
+  position: relative;
+
   div {
     font-size: 20px;
     padding: 10px;
-    margin-right: auto; 
+    margin-right: auto;
     font-weight: bold;
     text-align: center;
-    color : #414B6E;
+    color: #414b6e;
+    cursor: pointer;
   }
 
   p {
-    margin: 0; 
+    margin: 0;
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
   }
 `;
 
-
-
 const Header = () => {
+  const navigate = useNavigate();
   const todayData = () => {
     let now = new Date();
     let year = now.getFullYear();
@@ -44,7 +43,9 @@ const Header = () => {
   return (
     <>
       <HeaderStyle>
-        <div>Romance <br/> Memo</div>
+        <div onClick={() => navigate("/")}>
+          Romance <br /> Memo
+        </div>
         <p>{todayData()}</p>
       </HeaderStyle>
       <hr />
