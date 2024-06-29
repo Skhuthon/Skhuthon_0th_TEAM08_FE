@@ -183,8 +183,7 @@ const DetailPage = () => {
     fetchMemo();
   }, [postId]);
 
-  const handleCommentSubmit = async (event) => {
-    event.preventDefault();
+  const handleCommentSubmit = async () => {
     try {
       const response = await axios.post("https://handmark.shop/comments", {
         content: comment,
@@ -199,6 +198,7 @@ const DetailPage = () => {
           ],
         }));
         setComment("");
+        window.location.reload();
       }
     } catch (error) {
       console.error("Failed to submit comment:", error);
@@ -237,9 +237,9 @@ const DetailPage = () => {
     }
   };
 
-  // const handleEdit = () => {
-  //   navigate(`/edit/${postId}`);
-  // };
+  const handleEdit = () => {
+    navigate(`/edit/${postId}`);
+  };
 
   const handleDeletePost = async () => {
     try {
@@ -290,7 +290,7 @@ const DetailPage = () => {
         <HeaderContainer>
           <Title>{memo.title || "제목없음"}</Title>
           <ButtonsContainer>
-            {/* <BtnStyle onClick={handleEdit}>수정</BtnStyle> */}
+            <BtnStyle onClick={handleEdit}>수정</BtnStyle>
             <BtnStyle onClick={handleDeletePost}>삭제</BtnStyle>
             <BtnStyle onClick={handleLike}>
               <FaThumbsUp /> {memo.likes}

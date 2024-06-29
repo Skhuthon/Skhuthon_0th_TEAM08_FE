@@ -80,13 +80,13 @@ const WritePage = () => {
 
   useEffect(() => {
     if (postId) {
-      // 수정할 게시물이 있을 경우 데이터 불러오기
+      // Fetch the post data if it exists
       const fetchPost = async () => {
         try {
           const response = await axios.get(
             `https://handmark.shop/post/${postId}`
           );
-          const postData = response.data;
+          const postData = response.data.data; // Adjust according to your response data structure
           setTitle(postData.title);
           setContent(postData.content);
           setExistingImage(postData.imageUrl);
@@ -160,14 +160,14 @@ const WritePage = () => {
       </BackBtn>
       <Page>
         <FormContainer>
-          <form>
+          <form onSubmit={handleSave}>
             <label htmlFor="imageUpload">오늘의 사진</label>
             <InputStyle
               id="imageUpload"
               type="file"
               onChange={handleImageChange}
             />
-            {existingImage && (
+            {existingImage && !image && (
               <img
                 src={existingImage}
                 alt="기존 이미지"
@@ -194,9 +194,7 @@ const WritePage = () => {
               <BtnStyle type="button" onClick={handleCancel}>
                 취소
               </BtnStyle>
-              <BtnStyle type="button" onClick={handleSave}>
-                {postId ? "수정" : "등록"}
-              </BtnStyle>
+              <BtnStyle type="submit">{postId ? "수정" : "등록"}</BtnStyle>
             </ButtonContainer>
           </form>
         </FormContainer>
