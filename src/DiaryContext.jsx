@@ -1,7 +1,8 @@
-import React, { createContext, useState } from "react";
+import { createContext, useState } from "react";
 
 export const DiaryContext = createContext();
 
+// eslint-disable-next-line react/prop-types
 export const DiaryProvider = ({ children }) => {
   const [entries, setEntries] = useState([]);
 
