@@ -94,6 +94,7 @@ const SubCommentContainer = styled.div`
   justify-content: space-between;
   align-items: center;
 `;
+
 const SubmitButton = styled.button`
   background-color: white;
   border: 1px solid #bababa;
@@ -103,6 +104,18 @@ const SubmitButton = styled.button`
   cursor: pointer;
 `;
 
+const CommentList = styled.div`
+  margin-top: 20px;
+`;
+
+const CommentItem = styled.div`
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  color: #444;
+  &:last-child {
+    border-bottom: none;
+  }
+`;
 const DetailPage = () => {
   const { postId } = useParams();
   const navigate = useNavigate();
@@ -127,10 +140,23 @@ const DetailPage = () => {
     fetchMemo();
   }, [postId]);
 
-  const handleCommentSubmit = (event) => {
+  const handleCommentSubmit = async (event) => {
     event.preventDefault();
-    console.log("Comment submitted:", comment);
-    setComment("");
+    try {
+      const response = await axios.post("https://handmark.shop/comments", {
+        content: comment,
+        postId: postId,
+      });
+      if (response.status === 201) {
+        setMemo((prevMemo) => ({
+          ...prevMemo,
+          comments: [...prevMemo.comments, comment],
+        }));
+        setComment("");
+      }
+    } catch (error) {
+      console.error("Failed to submit comment:", error);
+    }
   };
 
   const handleEdit = () => {
@@ -185,7 +211,7 @@ const DetailPage = () => {
 
         <ContentSection>
           <ContentText>{memo.content}</ContentText>
-          <img src={memo.image} alt="오늘의 사진" />
+          {memo.imageUrl && <img src={memo.imageUrl} alt="오늘의 사진" />}
         </ContentSection>
 
         <hr />
@@ -203,7 +229,13 @@ const DetailPage = () => {
             </form>
           </SubCommentContainer>
           <div>댓글 목록</div>
-          {/* 댓글 목록을 렌더링하는 부분 */}
+          <hr />
+          <CommentList>
+            {memo.comments &&
+              memo.comments.map((c, index) => (
+                <CommentItem key={index}>{c}</CommentItem>
+              ))}
+          </CommentList>
         </CommentContainer>
       </MemoContainer>
     </Page>

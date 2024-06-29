@@ -114,7 +114,6 @@ const WritePage = () => {
     try {
       let response;
       if (postId) {
-        // 수정 요청
         response = await axios.patch(
           `https://handmark.shop/post/${postId}`,
           postData

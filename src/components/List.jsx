@@ -1,6 +1,6 @@
-import { useContext, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { DiaryContext } from "../DiaryContext";
+import axios from "axios";
 import styled from "styled-components";
 import CommonTable from "../table/CommonTable";
 
@@ -27,9 +27,26 @@ const HrStyle = styled.hr`
 `;
 
 const List = () => {
-  const { entries } = useContext(DiaryContext);
+  const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const itemsPerPage = 4;
+
+  useEffect(() => {
+    const fetchEntries = async () => {
+      try {
+        const response = await axios.get("https://handmark.shop/post");
+        setEntries(response.data.posts);
+        setLoading(false);
+      } catch (error) {
+        console.error("Failed to fetch entries:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchEntries();
+  }, []);
+
   const pageCount = Math.ceil(entries.length / itemsPerPage);
 
   const handlePageChange = ({ selected }) => {
@@ -40,11 +57,15 @@ const List = () => {
   const startIndex = currentPage * itemsPerPage;
   const selectedEntries = entries.slice(startIndex, startIndex + itemsPerPage);
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <ListStyle>
-      {selectedEntries.map((entry) => (
-        <div key={entry.id}>
-          <LinkStyle to={`/detail/${entry.id}`}>
+      {selectedEntries.map((entry, index) => (
+        <div key={index}>
+          <LinkStyle to={`/detail/${index}`}>
             {entry.title}
             <Ex>조회수, 댓글</Ex>
             <HrStyle />
