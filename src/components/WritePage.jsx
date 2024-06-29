@@ -81,7 +81,7 @@ const WritePage = () => {
   useEffect(() => {
     if (postId) {
       // 수정할 게시물이 있을 경우 데이터 불러오기
-      const fetchMemo = async () => {
+      const fetchPost = async () => {
         try {
           const response = await axios.get(
             `https://handmark.shop/post/${postId}`
@@ -89,12 +89,12 @@ const WritePage = () => {
           const postData = response.data;
           setTitle(postData.title);
           setContent(postData.content);
-          setExistingImage(postData.image);
+          setExistingImage(postData.imageUrl);
         } catch (error) {
           console.error("Failed to fetch post:", error);
         }
       };
-      fetchMemo();
+      fetchPost();
     }
   }, [postId]);
 
@@ -108,46 +108,39 @@ const WritePage = () => {
     const postData = {
       title,
       content,
+      view: 0,
+      likes: 0,
       postDate: new Date().toISOString(),
     };
+
+    const formData = new FormData();
+    const jsonBlob = new Blob([JSON.stringify(postData)], {
+      type: "application/json",
+    });
+    formData.append("post", jsonBlob);
+    if (image) {
+      formData.append("file", image);
+    }
 
     try {
       let response;
       if (postId) {
-        // 수정 요청
         response = await axios.patch(
           `https://handmark.shop/post/${postId}`,
-          postData
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
         );
-        if (image) {
-          const formData = new FormData();
-          formData.append("image", image);
-          await axios.put(
-            `https://handmark.shop/api/images/update/${response.data.imageId}`,
-            formData,
-            {
-              headers: {
-                "Content-Type": "multipart/form-data",
-              },
-            }
-          );
-        }
         console.log("Post updated:", response.data);
       } else {
-        response = await axios.post("https://handmark.shop/post", postData);
-        if (image) {
-          const formData = new FormData();
-          formData.append("image", image);
-          await axios.put(
-            `https://handmark.shop/api/images/update/${response.data.imageId}`,
-            formData,
-            {
-              headers: {
-                "Content-Type": "multipart/form-data",
-              },
-            }
-          );
-        }
+        response = await axios.post("https://handmark.shop/post", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
         console.log("Post created:", response.data);
       }
       navigate("/");
@@ -168,8 +161,12 @@ const WritePage = () => {
       <Page>
         <FormContainer>
           <form>
-            오늘의 사진 <br />
-            <InputStyle type="file" onChange={handleImageChange} /> <br />
+            <label htmlFor="imageUpload">오늘의 사진</label>
+            <InputStyle
+              id="imageUpload"
+              type="file"
+              onChange={handleImageChange}
+            />
             {existingImage && (
               <img
                 src={existingImage}
@@ -177,26 +174,29 @@ const WritePage = () => {
                 style={{ width: "100%", marginTop: "10px" }}
               />
             )}
-            오늘을 한 줄로? <br />
+            <br />
+            <label htmlFor="titleInput">오늘을 한 줄로?</label>
             <InputStyle
+              id="titleInput"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-            />{" "}
+            />
             <br />
-            오늘 나의 하루는? <br />
+            <label htmlFor="contentTextarea">오늘 나의 하루는?</label>
             <TextStyle
+              id="contentTextarea"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-            />{" "}
+            />
             <br />
             <ButtonContainer>
-              <BtnStyle type="reset" onClick={handleCancel}>
+              <BtnStyle type="button" onClick={handleCancel}>
                 취소
               </BtnStyle>
-              <BtnStyle type="submit" onClick={handleSave}>
+              <BtnStyle type="button" onClick={handleSave}>
                 {postId ? "수정" : "등록"}
-              </BtnStyle>{" "}
+              </BtnStyle>
             </ButtonContainer>
           </form>
         </FormContainer>
