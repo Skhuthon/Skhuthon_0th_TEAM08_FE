@@ -63,10 +63,10 @@ const List = () => {
 
   return (
     <ListStyle>
-      {selectedEntries.map((entry, index) => (
-        <div key={index}>
-          <LinkStyle to={`/detail/${index}`}>
-            {entry.title}
+      {selectedEntries.map((entry) => (
+        <div key={entry.postId}>
+          <LinkStyle to={`/detail/${entry.postId}`}>
+            {entry.title || "제목없음"}
             <Ex>조회수, 댓글</Ex>
             <HrStyle />
           </LinkStyle>

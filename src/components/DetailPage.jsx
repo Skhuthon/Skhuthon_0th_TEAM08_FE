@@ -116,6 +116,7 @@ const CommentItem = styled.div`
     border-bottom: none;
   }
 `;
+
 const DetailPage = () => {
   const { postId } = useParams();
   const navigate = useNavigate();
@@ -188,6 +189,8 @@ const DetailPage = () => {
     );
   }
 
+  const formattedDate = new Date(memo.postDate).toLocaleDateString();
+
   return (
     <Page>
       <MemoContainer>
@@ -204,9 +207,11 @@ const DetailPage = () => {
         </InfoContainer>
 
         <LikeDateContainer>
-          <div>좋아요</div>
+          <div>좋아요 {memo.likes}</div>
           <div>&nbsp;|&nbsp;</div>
-          <div>{memo.date}</div>
+          <div>조회수 {memo.view}</div>
+          <div>&nbsp;|&nbsp;</div>
+          <div>{formattedDate}</div>
         </LikeDateContainer>
 
         <ContentSection>
