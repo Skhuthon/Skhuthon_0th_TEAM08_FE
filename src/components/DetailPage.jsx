@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import ClipLoader from "react-spinners/ClipLoader";
 import styled from "styled-components";
+import { FaThumbsUp, FaEye } from "react-icons/fa";
 
 const Page = styled.div`
   display: flex;
@@ -63,6 +64,7 @@ const Name = styled.div`
 const LikeDateContainer = styled.div`
   display: flex;
   align-items: center;
+  text-align: center;
   margin-top: 10px;
   color: #aaa;
 `;
@@ -73,6 +75,14 @@ const ContentSection = styled.div`
 
 const ContentText = styled.div`
   margin-top: 10px;
+`;
+
+const ImageStyle = styled.img`
+  max-width: 300px;
+  max-height: 300px;
+  width: auto;
+  height: auto;
+  display: block;
 `;
 
 const CommentContainer = styled.div`
@@ -106,15 +116,45 @@ const SubmitButton = styled.button`
 
 const CommentList = styled.div`
   margin-top: 20px;
+  height: 300px;
+  overflow-y: auto;
+  border: 1px solid #bababa;
+  border-radius: 5px;
+  padding: 10px;
+  margin-top: 10px;
+  color: #444;
 `;
 
 const CommentItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 10px;
   border-bottom: 1px solid #eee;
   color: #444;
-  &:last-child {
-    border-bottom: none;
-  }
+`;
+
+const CommentText = styled.div`
+  flex: 1;
+`;
+
+const DeleteButton = styled.button`
+  background-color: white;
+  border: 1px solid #bababa;
+  color: #bababa;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+`;
+
+const EditButton = styled.button`
+  background-color: white;
+  border: 1px solid #bababa;
+  margin-right: 10px;
+  color: #bababa;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
 `;
 
 const DetailPage = () => {
@@ -123,6 +163,8 @@ const DetailPage = () => {
   const [memo, setMemo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [comment, setComment] = useState("");
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editingCommentContent, setEditingCommentContent] = useState("");
 
   useEffect(() => {
     const fetchMemo = async () => {
@@ -130,7 +172,7 @@ const DetailPage = () => {
         const response = await axios.get(
           `https://handmark.shop/post/${postId}`
         );
-        setMemo(response.data);
+        setMemo(response.data.data); // 응답 데이터 형식에 따라 수정
         setLoading(false);
       } catch (error) {
         console.error("Failed to fetch memo:", error);
@@ -141,8 +183,7 @@ const DetailPage = () => {
     fetchMemo();
   }, [postId]);
 
-  const handleCommentSubmit = async (event) => {
-    event.preventDefault();
+  const handleCommentSubmit = async () => {
     try {
       const response = await axios.post("https://handmark.shop/comments", {
         content: comment,
@@ -151,12 +192,48 @@ const DetailPage = () => {
       if (response.status === 201) {
         setMemo((prevMemo) => ({
           ...prevMemo,
-          comments: [...prevMemo.comments, comment],
+          comments: [
+            ...prevMemo.comments,
+            { commentId: Date.now(), content: comment },
+          ],
         }));
         setComment("");
+        window.location.reload();
       }
     } catch (error) {
       console.error("Failed to submit comment:", error);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    try {
+      await axios.delete(`https://handmark.shop/comments/${commentId}`);
+      setMemo((prevMemo) => ({
+        ...prevMemo,
+        comments: prevMemo.comments.filter((c) => c.commentId !== commentId),
+      }));
+    } catch (error) {
+      console.error("Failed to delete comment:", error);
+    }
+  };
+
+  const handleEditComment = async () => {
+    try {
+      await axios.patch(`https://handmark.shop/comments/${editingCommentId}`, {
+        content: editingCommentContent,
+      });
+      setMemo((prevMemo) => ({
+        ...prevMemo,
+        comments: prevMemo.comments.map((c) =>
+          c.commentId === editingCommentId
+            ? { ...c, content: editingCommentContent }
+            : c
+        ),
+      }));
+      setEditingCommentId(null);
+      setEditingCommentContent("");
+    } catch (error) {
+      console.error("Failed to edit comment:", error);
     }
   };
 
@@ -164,12 +241,28 @@ const DetailPage = () => {
     navigate(`/edit/${postId}`);
   };
 
-  const handleDelete = async () => {
+  const handleDeletePost = async () => {
     try {
       await axios.delete(`https://handmark.shop/post/${postId}`);
       navigate("/");
     } catch (error) {
       console.error("Failed to delete memo:", error);
+    }
+  };
+
+  const handleLike = async () => {
+    try {
+      const response = await axios.post(
+        `https://handmark.shop/post/${postId}/like`
+      );
+      if (response.status === 200) {
+        setMemo((prevMemo) => ({
+          ...prevMemo,
+          likes: prevMemo.likes + 1,
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to like post:", error);
     }
   };
 
@@ -195,10 +288,13 @@ const DetailPage = () => {
     <Page>
       <MemoContainer>
         <HeaderContainer>
-          <Title>{memo.title}</Title>
+          <Title>{memo.title || "제목없음"}</Title>
           <ButtonsContainer>
             <BtnStyle onClick={handleEdit}>수정</BtnStyle>
-            <BtnStyle onClick={handleDelete}>삭제</BtnStyle>
+            <BtnStyle onClick={handleDeletePost}>삭제</BtnStyle>
+            <BtnStyle onClick={handleLike}>
+              <FaThumbsUp /> {memo.likes}
+            </BtnStyle>
           </ButtonsContainer>
         </HeaderContainer>
 
@@ -207,16 +303,18 @@ const DetailPage = () => {
         </InfoContainer>
 
         <LikeDateContainer>
-          <div>좋아요 {memo.likes}</div>
-          <div>&nbsp;|&nbsp;</div>
-          <div>조회수 {memo.view}</div>
+          <div>
+            <FaEye /> {memo.view}
+          </div>
           <div>&nbsp;|&nbsp;</div>
           <div>{formattedDate}</div>
         </LikeDateContainer>
 
         <ContentSection>
-          <ContentText>{memo.content}</ContentText>
-          {memo.imageUrl && <img src={memo.imageUrl} alt="오늘의 사진" />}
+          <ContentText>{memo.content || "제목없음"}</ContentText>
+          {memo.imageUrl && (
+            <ImageStyle src={memo.imageUrl} alt="오늘의 사진" />
+          )}
         </ContentSection>
 
         <hr />
@@ -237,8 +335,41 @@ const DetailPage = () => {
           <hr />
           <CommentList>
             {memo.comments &&
-              memo.comments.map((c, index) => (
-                <CommentItem key={index}>{c}</CommentItem>
+              memo.comments.map((c) => (
+                <CommentItem key={c.commentId}>
+                  {editingCommentId === c.commentId ? (
+                    <form onSubmit={handleEditComment}>
+                      <InputStyle
+                        type="text"
+                        value={editingCommentContent}
+                        onChange={(e) =>
+                          setEditingCommentContent(e.target.value)
+                        }
+                      />
+                      <SubmitButton type="submit">수정 완료</SubmitButton>
+                      <BtnStyle onClick={() => setEditingCommentId(null)}>
+                        취소
+                      </BtnStyle>
+                    </form>
+                  ) : (
+                    <>
+                      <CommentText>{c.content}</CommentText>
+                      <EditButton
+                        onClick={() => {
+                          setEditingCommentId(c.commentId);
+                          setEditingCommentContent(c.content);
+                        }}
+                      >
+                        수정
+                      </EditButton>
+                      <DeleteButton
+                        onClick={() => handleDeleteComment(c.commentId)}
+                      >
+                        삭제
+                      </DeleteButton>
+                    </>
+                  )}
+                </CommentItem>
               ))}
           </CommentList>
         </CommentContainer>

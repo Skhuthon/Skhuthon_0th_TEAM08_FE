@@ -4,7 +4,7 @@ import styled from "styled-components";
 const AppCover = styled.div`
   background-color: #f3eaea;
   background-size: cover;
-  height: 100vh;
+  min-height: 100vh;
   margin: 0;
   display: flex;
   justify-content: center;
@@ -12,8 +12,8 @@ const AppCover = styled.div`
 
 const AppContent = styled.div`
   background-color: white;
-  height: 100%;
   width: 60%;
+  padding: 20px;
 `;
 
 function App() {
