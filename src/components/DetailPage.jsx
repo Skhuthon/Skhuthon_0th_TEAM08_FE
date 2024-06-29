@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import ClipLoader from "react-spinners/ClipLoader";
 import styled from "styled-components";
+import { FaThumbsUp, FaEye } from "react-icons/fa";
 
 const Page = styled.div`
   display: flex;
@@ -63,6 +64,7 @@ const Name = styled.div`
 const LikeDateContainer = styled.div`
   display: flex;
   align-items: center;
+  text-align: center;
   margin-top: 10px;
   color: #aaa;
 `;
@@ -73,6 +75,14 @@ const ContentSection = styled.div`
 
 const ContentText = styled.div`
   margin-top: 10px;
+`;
+
+const ImageStyle = styled.img`
+  max-width: 300px;
+  max-height: 300px;
+  width: auto;
+  height: auto;
+  display: block;
 `;
 
 const CommentContainer = styled.div`
@@ -106,6 +116,13 @@ const SubmitButton = styled.button`
 
 const CommentList = styled.div`
   margin-top: 20px;
+  height: 300px;
+  overflow-y: auto;
+  border: 1px solid #eee;
+  border-radius: 5px;
+  padding: 10px;
+  margin-top: 10px;
+  color: #444;
 `;
 
 const CommentItem = styled.div`
@@ -173,6 +190,22 @@ const DetailPage = () => {
     }
   };
 
+  const handleLike = async () => {
+    try {
+      const response = await axios.post(
+        `https://handmark.shop/post/${postId}/like`
+      );
+      if (response.status === 200) {
+        setMemo((prevMemo) => ({
+          ...prevMemo,
+          likes: prevMemo.likes + 1,
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to like post:", error);
+    }
+  };
+
   if (loading) {
     return (
       <Page>
@@ -199,6 +232,9 @@ const DetailPage = () => {
           <ButtonsContainer>
             <BtnStyle onClick={handleEdit}>수정</BtnStyle>
             <BtnStyle onClick={handleDelete}>삭제</BtnStyle>
+            <BtnStyle onClick={handleLike}>
+              <FaThumbsUp /> {memo.likes}
+            </BtnStyle>
           </ButtonsContainer>
         </HeaderContainer>
 
@@ -207,16 +243,18 @@ const DetailPage = () => {
         </InfoContainer>
 
         <LikeDateContainer>
-          <div>좋아요 {memo.likes}</div>
-          <div>&nbsp;|&nbsp;</div>
-          <div>조회수 {memo.view}</div>
+          <div>
+            <FaEye /> {memo.view}
+          </div>
           <div>&nbsp;|&nbsp;</div>
           <div>{formattedDate}</div>
         </LikeDateContainer>
 
         <ContentSection>
           <ContentText>{memo.content}</ContentText>
-          {memo.imageUrl && <img src={memo.imageUrl} alt="오늘의 사진" />}
+          {memo.imageUrl && (
+            <ImageStyle src={memo.imageUrl} alt="오늘의 사진" />
+          )}
         </ContentSection>
 
         <hr />
