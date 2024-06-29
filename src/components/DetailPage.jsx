@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import ClipLoader from "react-spinners/ClipLoader";
 import styled from "styled-components";
@@ -71,10 +71,6 @@ const ContentSection = styled.div`
   margin-top: 20px;
 `;
 
-const ContentLabel = styled.div`
-  font-weight: bold;
-`;
-
 const ContentText = styled.div`
   margin-top: 10px;
 `;
@@ -108,7 +104,8 @@ const SubmitButton = styled.button`
 `;
 
 const DetailPage = () => {
-  const { id } = useParams();
+  const { postId } = useParams();
+  const navigate = useNavigate();
   const [memo, setMemo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [comment, setComment] = useState("");
@@ -116,22 +113,37 @@ const DetailPage = () => {
   useEffect(() => {
     const fetchMemo = async () => {
       try {
-        const response = await axios.get(`/memos/${id}`);
-        console.log(response.data);
+        const response = await axios.get(
+          `https://handmark.shop/post/${postId}`
+        );
         setMemo(response.data);
         setLoading(false);
       } catch (error) {
-        console.error("failed", error);
+        console.error("Failed to fetch memo:", error);
         setLoading(false);
       }
     };
+
     fetchMemo();
-  }, [id]);
+  }, [postId]);
 
   const handleCommentSubmit = (event) => {
     event.preventDefault();
     console.log("Comment submitted:", comment);
     setComment("");
+  };
+
+  const handleEdit = () => {
+    navigate(`/edit/${postId}`);
+  };
+
+  const handleDelete = async () => {
+    try {
+      await axios.delete(`https://handmark.shop/post/${postId}`);
+      navigate("/");
+    } catch (error) {
+      console.error("Failed to delete memo:", error);
+    }
   };
 
   if (loading) {
@@ -141,21 +153,23 @@ const DetailPage = () => {
       </Page>
     );
   }
+
   if (!memo) {
     return (
       <Page>
-        <div>메모가 없음.</div>
+        <div>메모를 찾을 수 없습니다.</div>
       </Page>
     );
   }
+
   return (
     <Page>
       <MemoContainer>
         <HeaderContainer>
-          <Title>제목</Title>
+          <Title>{memo.title}</Title>
           <ButtonsContainer>
-            <BtnStyle>버튼1</BtnStyle>
-            <BtnStyle>버튼2</BtnStyle>
+            <BtnStyle onClick={handleEdit}>수정</BtnStyle>
+            <BtnStyle onClick={handleDelete}>삭제</BtnStyle>
           </ButtonsContainer>
         </HeaderContainer>
 
@@ -166,17 +180,12 @@ const DetailPage = () => {
         <LikeDateContainer>
           <div>좋아요</div>
           <div>&nbsp;|&nbsp;</div>
-          <div>날짜</div>
+          <div>{memo.date}</div>
         </LikeDateContainer>
 
         <ContentSection>
-          <ContentLabel>내용:</ContentLabel>
           <ContentText>{memo.content}</ContentText>
-        </ContentSection>
-
-        <ContentSection>
-          <ContentLabel>사진:</ContentLabel>
-          <ContentText>{memo.image}</ContentText>
+          <img src={memo.image} alt="오늘의 사진" />
         </ContentSection>
 
         <hr />
@@ -194,7 +203,7 @@ const DetailPage = () => {
             </form>
           </SubCommentContainer>
           <div>댓글 목록</div>
-          <div>댓글1</div>
+          {/* 댓글 목록을 렌더링하는 부분 */}
         </CommentContainer>
       </MemoContainer>
     </Page>

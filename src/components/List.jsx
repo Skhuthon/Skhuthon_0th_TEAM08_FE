@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { DiaryContext } from "../DiaryContext";
 import styled from "styled-components";
@@ -34,7 +34,7 @@ const List = () => {
 
   const handlePageChange = ({ selected }) => {
     setCurrentPage(selected);
-    window.scrollTo(0, 320); // 페이지 변경 시 스크롤을 맨 위로 이동
+    window.scrollTo(0, 320);
   };
 
   const startIndex = currentPage * itemsPerPage;

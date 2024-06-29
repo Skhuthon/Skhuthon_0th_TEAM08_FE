@@ -25,7 +25,8 @@ const Home = () => {
             }
           />
           <Route path="/write" element={<WritePage />} />
-          <Route path="/detail/:id" element={<DetailPage />} />
+          <Route path="/edit/:postId" element={<WritePage />} />
+          <Route path="/detail/:postId" element={<DetailPage />} />
         </Routes>
       </DiaryProvider>
     </Router>
